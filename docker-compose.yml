@@ -2,12 +2,10 @@ version: '3.8'
 
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: dev
+    image: golang:1.21-alpine
     ports:
       - "8080:8080"
+    working_dir: /app
     environment:
       - APP_ENV=development
       - DB_HOST=db
@@ -24,8 +22,7 @@ services:
         condition: service_healthy
     volumes:
       - .:/app
-    # Run the live-reload air tool
-    command: ["air"]
+    command: ["sh", "scripts/start.sh"]
 
   db:
     image: postgres:15-alpine

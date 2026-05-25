@@ -22,11 +22,9 @@ func ConnectCache(cfg config.RedisConfig) (*Client, error) {
 		Password: cfg.Password,
 		DB:       0, // Default DB
 		// High Concurrency Tuning
-		PoolSize:        50,               // Max socket connections
-		MinIdleConns:    10,               // Maintain at least 10 idle connections
-		MaxConnAge:      15 * time.Minute, // Max connection age
-		PoolTimeout:     4 * time.Second,  // Timeout to fetch from pool
-		ConnMaxIdleTime: 5 * time.Minute,
+		PoolSize:     50,              // Max socket connections
+		MinIdleConns: 10,              // Maintain at least 10 idle connections
+		PoolTimeout:  4 * time.Second, // Timeout to fetch from pool
 	})
 
 	// Test connection
