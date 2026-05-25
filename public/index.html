@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gikomplaint v2 | GIKI Complaint Management Portal</title>
+    
+    <!-- Modern Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="/public/css/style.css">
+</head>
+<body>
+    <!-- Ambient Background Glows -->
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+
+    <!-- MAIN CONTAINER -->
+    <div id="app" class="app-container">
+        
+        <!-- ================= WELCOME / LOGIN VIEW ================= -->
+        <section id="login-view" class="view-section active">
+            <div class="login-wrapper">
+                <div class="login-brand">
+                    <div class="brand-badge">PORTAL V2</div>
+                    <h1>GIKOMPLAINT</h1>
+                    <p class="brand-tagline">Next-Generation Monolithic Complaint Management System for GIKI Students & Faculty</p>
+                </div>
+
+                <div class="glass-card login-card">
+                    <h2>Welcome to the Portal</h2>
+                    <p class="card-subtitle">Connect secure and verify instantly using your official GIKI Outlook Account.</p>
+
+                    <div class="outlook-benefit-list">
+                        <div class="benefit-item">
+                            <span class="benefit-icon">🛡️</span>
+                            <div class="benefit-text">
+                                <strong>GIKI Restricted</strong>
+                                <span>Strictly validates @giki.edu.pk email addresses</span>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <span class="benefit-icon">⚡</span>
+                            <div class="benefit-text">
+                                <strong>High Concurrency</strong>
+                                <span>Built on optimized Go, Redis, and Postgres pools</span>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <span class="benefit-icon">🔥</span>
+                            <div class="benefit-text">
+                                <strong>Student Crowdsourcing</strong>
+                                <span>Upvote existing hostel/mess complaints to avoid spam</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Outlook Sign In Button -->
+                    <a href="/auth/microsoft/login" class="btn btn-outlook" id="btn-login-outlook">
+                        <svg class="outlook-icon" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11.4 0H0v11.4h11.4V0z" fill="#F25022"/>
+                            <path d="M23 0H11.6v11.4H23V0z" fill="#7FBA00"/>
+                            <path d="M11.4 11.6H0V23h11.4V11.6z" fill="#00A4EF"/>
+                            <path d="M23 11.6H11.6V23H23V11.6z" fill="#FFB900"/>
+                        </svg>
+                        Sign in with GIKI Outlook
+                    </a>
+
+                    <div class="divider">
+                        <span>OR FOR LOCAL DEMONSTRATION</span>
+                    </div>
+
+                    <!-- Fast Bypass Button for Sandbox play -->
+                    <button class="btn btn-sandbox" id="btn-login-sandbox">
+                        🚀 Launch Demo Sandbox
+                    </button>
+                    <p class="sandbox-help">Bypasses Microsoft callback logic using simulated student credentials.</p>
+                </div>
+
+                <div class="login-footer">
+                    <span>GIKI Open Source Community &copy; 2026. Made with Go &amp; Redis.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PORTAL / DASHBOARD VIEW ================= -->
+        <section id="portal-view" class="view-section">
+            <!-- Sidebar Navigation -->
+            <aside class="portal-sidebar">
+                <div class="sidebar-brand">
+                    <span class="logo-dot"></span>
+                    <h3>GIKOMPLAINT</h3>
+                </div>
+
+                <!-- User Profile Summary in Sidebar -->
+                <div class="sidebar-user-card">
+                    <div class="user-avatar" id="user-avatar-char">G</div>
+                    <div class="user-info">
+                        <h4 id="user-display-name">GIKI Student</h4>
+                        <span id="user-display-email">u2021123@giki.edu.pk</span>
+                        <span class="role-badge" id="user-display-role">Student</span>
+                    </div>
+                </div>
+
+                <!-- Navigation List -->
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li class="active" data-target="tab-feed">
+                            <span class="nav-icon">📢</span> All Complaints
+                        </li>
+                        <li data-target="tab-my-complaints">
+                            <span class="nav-icon">👤</span> My Submissions
+                        </li>
+                        <li data-target="tab-submit">
+                            <span class="nav-icon">✍️</span> File a Complaint
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <button class="btn btn-logout" id="btn-logout">
+                        Logout Session
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Portal Dashboard Body -->
+            <main class="portal-main">
+                <!-- Topbar Header -->
+                <header class="portal-header">
+                    <div class="header-search">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="feed-search-input" placeholder="Search complaints by title, details...">
+                    </div>
+                    <div class="header-actions">
+                        <span class="pulse-indicator"></span>
+                        <span class="status-text">Backend Active</span>
+                    </div>
+                </header>
+
+                <div class="portal-content">
+                    
+                    <!-- TAB 1: ALL COMPLAINTS FEED -->
+                    <div id="tab-feed" class="tab-content active">
+                        <!-- High Impact Overview Cards -->
+                        <div class="stats-grid">
+                            <div class="glass-card stat-card border-glow-cyan">
+                                <span class="stat-icon bg-cyan-glow">📋</span>
+                                <div class="stat-details">
+                                    <h3 id="stat-total">0</h3>
+                                    <p>Total Registered</p>
+                                </div>
+                            </div>
+                            <div class="glass-card stat-card border-glow-amber">
+                                <span class="stat-icon bg-amber-glow">⏳</span>
+                                <div class="stat-details">
+                                    <h3 id="stat-pending">0</h3>
+                                    <p>Active Pending</p>
+                                </div>
+                            </div>
+                            <div class="glass-card stat-card border-glow-emerald">
+                                <span class="stat-icon bg-emerald-glow">✓</span>
+                                <div class="stat-details">
+                                    <h3 id="stat-resolved">0</h3>
+                                    <p>Successfully Resolved</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Feed Toolbar -->
+                        <div class="feed-toolbar">
+                            <h4>Recent Complaints Feed</h4>
+                            <div class="filter-actions">
+                                <select id="filter-category">
+                                    <option value="all">All Categories</option>
+                                    <option value="hostel">Hostel</option>
+                                    <option value="mess">Mess</option>
+                                    <option value="academic">Academic</option>
+                                    <option value="it_services">IT Services</option>
+                                    <option value="electricity">Electricity</option>
+                                    <option value="plumbing">Plumbing</option>
+                                    <option value="security">Security</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Complaint List -->
+                        <div class="complaints-feed-list" id="complaints-list-container">
+                            <!-- Injected by JavaScript dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: MY COMPLAINTS -->
+                    <div id="tab-my-complaints" class="tab-content">
+                        <div class="tab-header">
+                            <h2>My Submissions</h2>
+                            <p>Track history and update states of complaints submitted by your profile.</p>
+                        </div>
+                        <div class="complaints-feed-list" id="my-complaints-container">
+                            <!-- Injected by JavaScript dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: SUBMIT COMPLAINT FORM -->
+                    <div id="tab-submit" class="tab-content">
+                        <div class="tab-header">
+                            <h2>File a Campus Complaint</h2>
+                            <p>Submissions are public so that other students can upvote and support resolution.</p>
+                        </div>
+
+                        <div class="glass-card form-card">
+                            <form id="form-submit-complaint">
+                                <div class="form-group">
+                                    <label for="comp-title">Complaint Title</label>
+                                    <input type="text" id="comp-title" required placeholder="Describe the issue in a short sentence (e.g. Mess 2 Lunch uncooked)">
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="comp-category">Category</label>
+                                        <select id="comp-category" required>
+                                            <option value="hostel">Hostel / Accommodations</option>
+                                            <option value="mess">Mess &amp; Dining Hall</option>
+                                            <option value="academic">Academic &amp; Lab Facilities</option>
+                                            <option value="it_services">IT Services &amp; Campus Wifi</option>
+                                            <option value="electricity">Electricity &amp; Power Lines</option>
+                                            <option value="plumbing">Plumbing &amp; Water Supply</option>
+                                            <option value="security">Campus Security</option>
+                                            <option value="other">Other / General Concerns</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="comp-severity">Urgency Level</label>
+                                        <select id="comp-severity" required>
+                                            <option value="low">Low (General suggestion / fix when possible)</option>
+                                            <option value="medium" selected>Medium (Standard issue - needs fixing)</option>
+                                            <option value="high">High (Disruptive issue - immediate attention)</option>
+                                            <option value="critical">Critical (Severe infrastructure outage / hazardous)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="comp-description">Full Details / Context</label>
+                                    <textarea id="comp-description" rows="6" required placeholder="Provide exact locations, timelines, and description of what needs to be fixed..."></textarea>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-submit" id="btn-submit-complaint">
+                                        Submit Complaint Request
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </section>
+
+    </div>
+
+    <!-- Application Script Logic -->
+    <script src="/public/js/app.js"></script>
+</body>
+</html>

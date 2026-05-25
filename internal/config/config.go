@@ -12,6 +12,7 @@ type Config struct {
 	Redis     RedisConfig
 	JWTSecret string
 	JWTExpiry int
+	Microsoft MicrosoftOAuthConfig
 }
 
 type DBConfig struct {
@@ -27,6 +28,14 @@ type RedisConfig struct {
 	Host     string
 	Port     string
 	Password string
+}
+
+type MicrosoftOAuthConfig struct {
+	ClientID      string
+	ClientSecret  string
+	RedirectURI   string
+	TenantID      string
+	AllowedDomain string
 }
 
 // LoadConfig loads application configuration from environment variables.
@@ -48,6 +57,13 @@ func LoadConfig() *Config {
 			Host:     getEnv("REDIS_HOST", "localhost"),
 			Port:     getEnv("REDIS_PORT", "6379"),
 			Password: getEnv("REDIS_PASSWORD", ""),
+		},
+		Microsoft: MicrosoftOAuthConfig{
+			ClientID:      getEnv("AZURE_CLIENT_ID", ""),
+			ClientSecret:  getEnv("AZURE_CLIENT_SECRET", ""),
+			RedirectURI:   getEnv("AZURE_REDIRECT_URI", "http://localhost:8080/auth/microsoft/callback"),
+			TenantID:      getEnv("AZURE_TENANT_ID", "common"),
+			AllowedDomain: getEnv("ALLOWED_EMAIL_DOMAIN", "@giki.edu.pk"),
 		},
 	}
 }

@@ -17,6 +17,9 @@ import (
 	"github.com/giki-open-source/gikomplaint-v2/internal/cache"
 	"github.com/giki-open-source/gikomplaint-v2/internal/config"
 	"github.com/giki-open-source/gikomplaint-v2/internal/db"
+	"github.com/giki-open-source/gikomplaint-v2/internal/handler"
+	"github.com/giki-open-source/gikomplaint-v2/internal/repository"
+	"github.com/giki-open-source/gikomplaint-v2/internal/service"
 )
 
 func main() {
@@ -38,6 +41,11 @@ func main() {
 		log.Fatalf("Fatal: Redis initialization failed: %v", err)
 	}
 	defer redisClient.Redis.Close()
+
+	// Initialize Repository and Service Layers
+	userRepo := repository.NewUserRepository(pgDB)
+	authService := service.NewAuthService(cfg, userRepo, redisClient)
+	authHandler := handler.NewAuthHandler(authService)
 
 	// 4. Setup Router & Middleware
 	r := chi.NewRouter()
@@ -70,6 +78,12 @@ func main() {
 			"status":  "running",
 			"version": "2.0.0",
 		})
+	})
+
+	// Auth Routes Group
+	r.Route("/auth", func(r chi.Router) {
+		r.Get("/microsoft/login", authHandler.RedirectToMicrosoft)
+		r.Get("/microsoft/callback", authHandler.HandleMicrosoftCallback)
 	})
 
 	// Robust Health Check checking both PG and Redis
