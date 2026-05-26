@@ -73,16 +73,16 @@ func main() {
 
 	// 5. Register Routes
 	workDir, _ := os.Getwd()
-	publicDir := http.Dir(filepath.Join(workDir, "public"))
+	distDir := filepath.Join(workDir, "frontend", "dist")
 
 	// Direct serve of index.html at root "/"
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, filepath.Join(workDir, "public", "index.html"))
+		http.ServeFile(w, r, filepath.Join(distDir, "index.html"))
 	})
 
-	// Mount the static files (style.css, app.js, images, etc.)
-	r.Get("/public/*", func(w http.ResponseWriter, r *http.Request) {
-		fs := http.StripPrefix("/public/", http.FileServer(publicDir))
+	// Mount the compiled static assets (js, css, images) from frontend/dist/assets
+	r.Get("/assets/*", func(w http.ResponseWriter, r *http.Request) {
+		fs := http.StripPrefix("/assets/", http.FileServer(http.Dir(filepath.Join(distDir, "assets"))))
 		fs.ServeHTTP(w, r)
 	})
 

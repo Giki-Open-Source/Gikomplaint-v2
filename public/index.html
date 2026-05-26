@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gikomplaint v2 | GIKI Complaint Management Portal</title>
+    <title>Gikomplaint v2 | Minimalist Outage Feed</title>
     
     <!-- Modern Typography & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,6 +12,15 @@
     
     <!-- Custom Style Sheet -->
     <link rel="stylesheet" href="/public/css/style.css">
+    
+    <!-- Third Party Open Source Styles (Quill Editor & Toastify Notifications) -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <!-- Third Party Scripts (ApexCharts, Quill, Toastify) -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body>
     <!-- Ambient Background Glows -->
@@ -26,35 +35,35 @@
         <section id="login-view" class="view-section active">
             <div class="login-wrapper">
                 <div class="login-brand">
-                    <div class="brand-badge">PORTAL V2</div>
+                    <div class="brand-badge">FEED V2</div>
                     <h1>GIKOMPLAINT</h1>
-                    <p class="brand-tagline">Next-Generation Monolithic Complaint Management System for GIKI Students & Faculty</p>
+                    <p class="brand-tagline">Minimalist Outage Timeline &amp; Priority Scorer Console for GIKI Campus</p>
                 </div>
 
                 <div class="glass-card login-card">
-                    <h2>Welcome to the Portal</h2>
-                    <p class="card-subtitle">Connect secure and verify instantly using your official GIKI Outlook Account.</p>
+                    <h2>Connect to Timeline</h2>
+                    <p class="card-subtitle">Connect secure and verify instantly using your GIKI Outlook account.</p>
 
                     <div class="outlook-benefit-list">
                         <div class="benefit-item">
-                            <span class="benefit-icon">🛡️</span>
+                            <span class="benefit-icon">📢</span>
                             <div class="benefit-text">
-                                <strong>GIKI Restricted</strong>
-                                <span>Strictly validates @giki.edu.pk email addresses</span>
+                                <strong>Social Outage Timeline</strong>
+                                <span>A clean, high-concurrency scrolling feed of all GIKI complaints</span>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <span class="benefit-icon">📊</span>
+                            <div class="benefit-text">
+                                <strong>GIKI Priority Scorer</strong>
+                                <span>Help score reach &amp; disruption levels to prioritize dispatcher resources</span>
                             </div>
                         </div>
                         <div class="benefit-item">
                             <span class="benefit-icon">⚡</span>
                             <div class="benefit-text">
-                                <strong>High Concurrency</strong>
-                                <span>Built on optimized Go, Redis, and Postgres pools</span>
-                            </div>
-                        </div>
-                        <div class="benefit-item">
-                            <span class="benefit-icon">🔥</span>
-                            <div class="benefit-text">
-                                <strong>Student Crowdsourcing</strong>
-                                <span>Upvote existing hostel/mess complaints to avoid spam</span>
+                                <strong>Outlook Verified</strong>
+                                <span>Secure login restricted strictly to active @giki.edu.pk profiles</span>
                             </div>
                         </div>
                     </div>
@@ -74,113 +83,129 @@
                         <span>OR FOR LOCAL DEMONSTRATION</span>
                     </div>
 
-                    <!-- Fast Bypass Button for Sandbox play -->
                     <button class="btn btn-sandbox" id="btn-login-sandbox">
                         🚀 Launch Demo Sandbox
                     </button>
-                    <p class="sandbox-help">Bypasses Microsoft callback logic using simulated student credentials.</p>
+                    <p class="sandbox-help">Bypasses external OAuth systems to explore the minimalist timeline.</p>
                 </div>
 
                 <div class="login-footer">
-                    <span>GIKI Open Source Community &copy; 2026. Made with Go &amp; Redis.</span>
+                    <span>GIKI Open Source Community &copy; 2026. Powered by Go &amp; Redis.</span>
                 </div>
             </div>
         </section>
 
         <!-- ================= PORTAL / DASHBOARD VIEW ================= -->
         <section id="portal-view" class="view-section">
-            <!-- Sidebar Navigation -->
-            <aside class="portal-sidebar">
-                <div class="sidebar-brand">
-                    <span class="logo-dot"></span>
-                    <h3>GIKOMPLAINT</h3>
+            
+            <!-- LEFT ICONIC MINIMALIST NAVBAR -->
+            <aside class="slim-navbar">
+                <div class="nav-brand-dot">
+                    <span class="pulse-indicator"></span>
                 </div>
-
-                <!-- User Profile Summary in Sidebar -->
-                <div class="sidebar-user-card">
-                    <div class="user-avatar" id="user-avatar-char">G</div>
-                    <div class="user-info">
-                        <h4 id="user-display-name">GIKI Student</h4>
-                        <span id="user-display-email">u2021123@giki.edu.pk</span>
-                        <span class="role-badge" id="user-display-role">Student</span>
-                    </div>
-                </div>
-
-                <!-- Navigation List -->
-                <nav class="sidebar-nav">
+                
+                <nav class="slim-nav-links">
                     <ul>
-                        <li class="active" data-target="tab-feed">
-                            <span class="nav-icon">📢</span> All Complaints
+                        <li class="active" data-target="tab-feed" title="Outage Timeline">
+                            <span class="nav-icon">📢</span>
+                            <span class="nav-label">Timeline</span>
                         </li>
-                        <li data-target="tab-my-complaints">
-                            <span class="nav-icon">👤</span> My Submissions
+                        <li data-target="tab-my-complaints" title="My Submissions">
+                            <span class="nav-icon">👤</span>
+                            <span class="nav-label">My Logs</span>
                         </li>
-                        <li data-target="tab-submit">
-                            <span class="nav-icon">✍️</span> File a Complaint
+                        <li data-target="tab-analytics" title="Insights Console">
+                            <span class="nav-icon">📊</span>
+                            <span class="nav-label">Insights</span>
                         </li>
                     </ul>
                 </nav>
 
-                <div class="sidebar-footer">
-                    <button class="btn btn-logout" id="btn-logout">
-                        Logout Session
-                    </button>
+                <div class="nav-profile-trigger">
+                    <div class="user-avatar" id="user-avatar-char">G</div>
+                    <button class="btn-logout-icon" id="btn-logout" title="Log Out Session">🚪</button>
                 </div>
             </aside>
 
-            <!-- Main Portal Dashboard Body -->
-            <main class="portal-main">
-                <!-- Topbar Header -->
-                <header class="portal-header">
-                    <div class="header-search">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" id="feed-search-input" placeholder="Search complaints by title, details...">
-                    </div>
-                    <div class="header-actions">
-                        <span class="pulse-indicator"></span>
-                        <span class="status-text">Backend Active</span>
-                    </div>
-                </header>
-
-                <div class="portal-content">
+            <!-- MAIN TIMELINE CONTENT AREA -->
+            <main class="timeline-container">
+                
+                <!-- TIMELINE CENTRAL COLUMN -->
+                <div class="timeline-feed-column">
                     
-                    <!-- TAB 1: ALL COMPLAINTS FEED -->
+                    <!-- Topbar Sticky Header -->
+                    <header class="timeline-header">
+                        <h2>Campus Outage Feed</h2>
+                        <div class="timeline-header-meta">
+                            <span class="status-indicator-green"></span>
+                            <span class="status-indicator-text">Active Monolith</span>
+                        </div>
+                    </header>
+
+                    <!-- TAB PANEL 1: TIMELINE FEED -->
                     <div id="tab-feed" class="tab-content active">
-                        <!-- High Impact Overview Cards -->
-                        <div class="stats-grid">
-                            <div class="glass-card stat-card border-glow-cyan">
-                                <span class="stat-icon bg-cyan-glow">📋</span>
-                                <div class="stat-details">
-                                    <h3 id="stat-total">0</h3>
-                                    <p>Total Registered</p>
-                                </div>
+                        
+                        <!-- 🚀 INLINE QUICK COMPOSER (Innovator Panel) -->
+                        <div class="glass-card quick-composer-card" id="quick-composer">
+                            <div class="composer-collapsed" id="composer-collapsed-trigger">
+                                <div class="user-avatar mini" id="user-mini-avatar">S</div>
+                                <div class="composer-placeholder">Report an active GIKI outage, @student...</div>
                             </div>
-                            <div class="glass-card stat-card border-glow-amber">
-                                <span class="stat-icon bg-amber-glow">⏳</span>
-                                <div class="stat-details">
-                                    <h3 id="stat-pending">0</h3>
-                                    <p>Active Pending</p>
-                                </div>
-                            </div>
-                            <div class="glass-card stat-card border-glow-emerald">
-                                <span class="stat-icon bg-emerald-glow">✓</span>
-                                <div class="stat-details">
-                                    <h3 id="stat-resolved">0</h3>
-                                    <p>Successfully Resolved</p>
-                                </div>
+                            
+                            <div class="composer-expanded" id="composer-expanded-drawer" style="display: none;">
+                                <form id="form-quick-composer">
+                                    <div class="form-group">
+                                        <input type="text" id="comp-title" required placeholder="Outage Title (e.g. Hostel 12 plumbing fused)">
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Category</label>
+                                            <select id="comp-category" required>
+                                                <option value="hostel">Hostel</option>
+                                                <option value="mess">Mess &amp; Dining</option>
+                                                <option value="academic">Academic Wing</option>
+                                                <option value="it_services">Campus Wifi / IT</option>
+                                                <option value="electricity">Electricity Outage</option>
+                                                <option value="plumbing">Plumbing / Water</option>
+                                                <option value="security">Security Patrol</option>
+                                                <option value="other">General</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Urgency State</label>
+                                            <select id="comp-severity" required>
+                                                <option value="low">Low (Suggestion)</option>
+                                                <option value="medium" selected>Medium (Standard)</option>
+                                                <option value="high">High (Disruptive)</option>
+                                                <option value="critical">Critical (Outage)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Full Outage Details</label>
+                                        <div id="editor-container" style="height: 180px;"></div>
+                                    </div>
+                                    <div class="composer-actions-row">
+                                        <button type="button" class="btn btn-cancel-composer" id="btn-cancel-composer">Cancel</button>
+                                        <button type="submit" class="btn btn-submit-timeline">Broadcast Outage</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
 
-                        <!-- Feed Toolbar -->
-                        <div class="feed-toolbar">
-                            <h4>Recent Complaints Feed</h4>
-                            <div class="filter-actions">
+                        <!-- Timeline Filters / Sorting Options -->
+                        <div class="timeline-feed-filter-bar">
+                            <div class="feed-sort-triggers">
+                                <button class="sort-btn active" id="sort-priority-trigger">🔥 GIKI Priority Rank</button>
+                                <button class="sort-btn" id="sort-newest-trigger">🕒 Recent Updates</button>
+                            </div>
+                            <div class="filter-actions-inline">
                                 <select id="filter-category">
-                                    <option value="all">All Categories</option>
+                                    <option value="all">All Sectors</option>
                                     <option value="hostel">Hostel</option>
                                     <option value="mess">Mess</option>
                                     <option value="academic">Academic</option>
-                                    <option value="it_services">IT Services</option>
+                                    <option value="it_services">Wifi / IT</option>
                                     <option value="electricity">Electricity</option>
                                     <option value="plumbing">Plumbing</option>
                                     <option value="security">Security</option>
@@ -188,77 +213,80 @@
                             </div>
                         </div>
 
-                        <!-- Complaint List -->
-                        <div class="complaints-feed-list" id="complaints-list-container">
+                        <!-- Complaints Feed List (Social Posts injected here) -->
+                        <div class="timeline-posts-list" id="complaints-list-container">
                             <!-- Injected by JavaScript dynamically -->
                         </div>
                     </div>
 
-                    <!-- TAB 2: MY COMPLAINTS -->
+                    <!-- TAB PANEL 2: MY SUBMISSIONS -->
                     <div id="tab-my-complaints" class="tab-content">
-                        <div class="tab-header">
-                            <h2>My Submissions</h2>
-                            <p>Track history and update states of complaints submitted by your profile.</p>
+                        <div class="tab-header-minimal">
+                            <h2>My Submission Logs</h2>
+                            <p>Track progress of outages reported by your authenticated GIKI session.</p>
                         </div>
-                        <div class="complaints-feed-list" id="my-complaints-container">
+                        <div class="timeline-posts-list" id="my-complaints-container">
                             <!-- Injected by JavaScript dynamically -->
                         </div>
                     </div>
 
-                    <!-- TAB 3: SUBMIT COMPLAINT FORM -->
-                    <div id="tab-submit" class="tab-content">
-                        <div class="tab-header">
-                            <h2>File a Campus Complaint</h2>
-                            <p>Submissions are public so that other students can upvote and support resolution.</p>
+                    <!-- TAB PANEL 3: ANALYTICS OVERLAY -->
+                    <div id="tab-analytics" class="tab-content">
+                        <div class="tab-header-minimal">
+                            <h2>Administrative Insights Console</h2>
+                            <p>Live crowdsourced analytics driven by the mathematical GIKI Priority Index (GPI).</p>
                         </div>
-
-                        <div class="glass-card form-card">
-                            <form id="form-submit-complaint">
-                                <div class="form-group">
-                                    <label for="comp-title">Complaint Title</label>
-                                    <input type="text" id="comp-title" required placeholder="Describe the issue in a short sentence (e.g. Mess 2 Lunch uncooked)">
-                                </div>
-
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="comp-category">Category</label>
-                                        <select id="comp-category" required>
-                                            <option value="hostel">Hostel / Accommodations</option>
-                                            <option value="mess">Mess &amp; Dining Hall</option>
-                                            <option value="academic">Academic &amp; Lab Facilities</option>
-                                            <option value="it_services">IT Services &amp; Campus Wifi</option>
-                                            <option value="electricity">Electricity &amp; Power Lines</option>
-                                            <option value="plumbing">Plumbing &amp; Water Supply</option>
-                                            <option value="security">Campus Security</option>
-                                            <option value="other">Other / General Concerns</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="comp-severity">Urgency Level</label>
-                                        <select id="comp-severity" required>
-                                            <option value="low">Low (General suggestion / fix when possible)</option>
-                                            <option value="medium" selected>Medium (Standard issue - needs fixing)</option>
-                                            <option value="high">High (Disruptive issue - immediate attention)</option>
-                                            <option value="critical">Critical (Severe infrastructure outage / hazardous)</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="comp-description">Full Details / Context</label>
-                                    <textarea id="comp-description" rows="6" required placeholder="Provide exact locations, timelines, and description of what needs to be fixed..."></textarea>
-                                </div>
-
-                                <div class="form-actions">
-                                    <button type="submit" class="btn btn-submit" id="btn-submit-complaint">
-                                        Submit Complaint Request
-                                    </button>
-                                </div>
-                            </form>
+                        
+                        <div class="analytics-layout">
+                            <div class="glass-card chart-card">
+                                <h3>Active Outages by Sector</h3>
+                                <div id="chart-categories" style="min-height: 280px;"></div>
+                            </div>
+                            <div class="glass-card chart-card">
+                                <h3>GPI Score Density & Urgency Weight</h3>
+                                <div id="chart-status-urgency" style="min-height: 280px;"></div>
+                            </div>
                         </div>
                     </div>
 
                 </div>
+
+                <!-- RIGHT SIDE WIDGETS COLUMN (Desktop Only) -->
+                <aside class="timeline-widgets-column">
+                    <div class="widget-search-wrapper">
+                        <span class="search-icon-timeline">🔍</span>
+                        <input type="text" id="feed-search-input" placeholder="Search outages, hostels...">
+                    </div>
+
+                    <!-- Realtime Scoreboard -->
+                    <div class="glass-card widget-card border-glow-cyan">
+                        <h3>Campus Health Scoreboard</h3>
+                        <div class="widget-stats-list">
+                            <div class="w-stat-item">
+                                <span class="w-stat-lbl">Active Incidents</span>
+                                <strong id="stat-pending">0</strong>
+                            </div>
+                            <div class="w-stat-item">
+                                <span class="w-stat-lbl">Resolved Issues</span>
+                                <strong id="stat-resolved" class="color-emerald">0</strong>
+                            </div>
+                            <div class="w-stat-item">
+                                <span class="w-stat-lbl">Total Logged</span>
+                                <strong id="stat-total">0</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GIKI Info Widget -->
+                    <div class="glass-card widget-card">
+                        <h3>GPI Scoring System</h3>
+                        <p class="widget-desc">Outages are dynamically prioritized based on student reach evaluations. The **GIKI Priority Index (GPI)** ranges from **1 to 100** to ensure major utility failures get immediate dispatch attention.</p>
+                        <div class="widget-footer-links">
+                            <span>Open Source Portal V2</span>
+                        </div>
+                    </div>
+                </aside>
+
             </main>
         </section>
 
