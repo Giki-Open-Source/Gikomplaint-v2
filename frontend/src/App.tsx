@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { SlimNavbar } from './components/SlimNavbar';
 import { TimelineFeed } from './components/TimelineFeed';
 import { AnalyticsConsole } from './components/AnalyticsConsole';
+import { AdminConsole } from './components/AdminConsole';
 
 interface User {
   first_name: string;
@@ -105,7 +106,7 @@ const initialComplaints: Complaint[] = [
 export default function App() {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<'feed' | 'my-complaints' | 'analytics'>('feed');
+  const [activeTab, setActiveTab] = useState<'feed' | 'my-complaints' | 'analytics' | 'admin-console'>('feed');
   const [complaints, setComplaints] = useState<Complaint[]>(initialComplaints);
   const [searchVal, setSearchVal] = useState('');
 
@@ -184,17 +185,36 @@ export default function App() {
     showToast('Session terminated.', 'amber');
   };
 
-  const handleSandboxLogin = () => {
-    const mockUser: User = {
+  const handleSandboxLogin = (role: 'student' | 'staff' | 'admin') => {
+    let mockUser: User = {
       id: 101,
       email: 'student_demo@giki.edu.pk',
       first_name: 'Demo',
       last_name: 'Student',
       role: 'student',
     } as any;
-    const mockToken = 'simulated_jwt_token_for_sandbox';
+
+    if (role === 'staff') {
+      mockUser = {
+        id: 102,
+        email: 'plumber_dispatcher@giki.edu.pk',
+        first_name: 'Zafar',
+        last_name: 'Iqbal (Plumbing)',
+        role: 'staff',
+      } as any;
+    } else if (role === 'admin') {
+      mockUser = {
+        id: 103,
+        email: 'admin_manager@giki.edu.pk',
+        first_name: 'Dr. Suleman',
+        last_name: 'Khan (Manager)',
+        role: 'admin',
+      } as any;
+    }
+
+    const mockToken = `simulated_jwt_token_for_${role}_sandbox`;
     storeSession(mockToken, mockUser);
-    showToast('Demo session initiated.', 'cyan');
+    showToast(`${role.toUpperCase()} sandbox session initiated.`, 'cyan');
   };
 
   const handleUpdateComplaint = (id: number, updatedFields: Partial<Complaint>) => {
@@ -299,10 +319,18 @@ export default function App() {
               <span>LOCAL BYPASS FOR DEMONSTRATION</span>
             </div>
 
-            <button className="btn btn-sandbox" onClick={handleSandboxLogin}>
-              Launch Sandbox Session
-            </button>
-            <p className="sandbox-help">Explore the minimalist timeline interface directly.</p>
+             <div className="sandbox-buttons-grid" style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+               <button className="btn btn-sandbox student-btn" onClick={() => handleSandboxLogin('student')}>
+                 Launch Student Sandbox
+               </button>
+               <button className="btn btn-sandbox staff-btn" onClick={() => handleSandboxLogin('staff')}>
+                 Launch Staff Dispatcher Sandbox
+               </button>
+               <button className="btn btn-sandbox admin-btn" onClick={() => handleSandboxLogin('admin')}>
+                 Launch Global Admin Sandbox
+               </button>
+             </div>
+             <p className="sandbox-help">Explore the timeline with different user privileges directly.</p>
           </div>
 
           <div className="login-footer">
@@ -358,7 +386,16 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'analytics' && <AnalyticsConsole complaints={complaints} />}
+           {activeTab === 'analytics' && <AnalyticsConsole complaints={complaints} />}
+
+           {activeTab === 'admin-console' && (
+             <AdminConsole
+               complaints={complaints}
+               onUpdateComplaint={handleUpdateComplaint}
+               showToast={showToast}
+               user={user}
+             />
+           )}
         </div>
       </main>
     </section>

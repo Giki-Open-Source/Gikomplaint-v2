@@ -8,8 +8,8 @@ interface User {
 }
 
 interface SlimNavbarProps {
-  activeTab: 'feed' | 'my-complaints' | 'analytics';
-  setActiveTab: (tab: 'feed' | 'my-complaints' | 'analytics') => void;
+  activeTab: 'feed' | 'my-complaints' | 'analytics' | 'admin-console';
+  setActiveTab: (tab: 'feed' | 'my-complaints' | 'analytics' | 'admin-console') => void;
   user: User;
   onLogout: () => void;
 }
@@ -54,6 +54,16 @@ export const SlimNavbar: React.FC<SlimNavbarProps> = ({
             <span className="nav-icon">◇</span>
             <span className="nav-label">Insights</span>
           </li>
+          {(user.role === 'admin' || user.role === 'staff') && (
+            <li
+              className={activeTab === 'admin-console' ? 'active' : ''}
+              onClick={() => setActiveTab('admin-console')}
+              title="Admin Control Panel"
+            >
+              <span className="nav-icon">▩</span>
+              <span className="nav-label">Control</span>
+            </li>
+          )}
         </ul>
       </nav>
 
