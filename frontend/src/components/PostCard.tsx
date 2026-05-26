@@ -15,6 +15,7 @@ interface Complaint {
   authorName: string;
   authorEmail: string;
   createdAt: string;
+  images?: string[];
 }
 
 interface PostCardProps {
@@ -142,6 +143,16 @@ export const PostCard: React.FC<PostCardProps> = ({
             className="comp-body-desc"
             dangerouslySetInnerHTML={{ __html: complaint.description }}
           />
+
+          {complaint.images && complaint.images.length > 0 && (
+            <div className="comp-images-grid">
+              {complaint.images.map((imgSrc, idx) => (
+                <img key={idx} src={imgSrc} alt="Outage incident attach" onClick={(e) => {
+                  e.stopPropagation();
+                }} />
+              ))}
+            </div>
+          )}
 
           <div className="comp-meta-tags">
             <span className={`badge badge-cat-${complaint.category}`}>

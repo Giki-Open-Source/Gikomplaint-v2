@@ -28,7 +28,7 @@ interface Complaint {
 interface TimelineFeedProps {
   complaints: Complaint[];
   onUpdateComplaint: (id: number, updatedFields: Partial<Complaint>) => void;
-  onCreateComplaint: (title: string, category: string, severity: string, description: string) => void;
+  onCreateComplaint: (title: string, category: string, severity: string, description: string, images?: string[]) => void;
   showToast: (message: string, type?: 'cyan' | 'emerald' | 'amber' | 'rose') => void;
   user: User;
   isOwnOnly: boolean;
@@ -53,8 +53,10 @@ export const TimelineFeed: React.FC<TimelineFeedProps> = ({
   const [sortCriteria, setSortCriteria] = useState<'priority' | 'newest'>('priority');
   const [filterCategory, setFilterCategory] = useState('all');
   const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
   const quillInstanceRef = useRef<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize Quill dynamically when expanded
   useEffect(() => {
@@ -86,6 +88,38 @@ export const TimelineFeed: React.FC<TimelineFeedProps> = ({
     setTitle('');
     setCategory('hostel');
     setSeverity('medium');
+    setSelectedImages([]);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    // Simulate asking permission (as requested)
+    showToast("Requesting device media library and camera permissions...", "cyan");
+
+    setTimeout(() => {
+      const readPromises = Array.from(files).map((file) => {
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            if (event.target?.result) {
+              resolve(event.target.result as string);
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(readPromises).then((results) => {
+        setSelectedImages((prev) => [...prev, ...results]);
+        showToast(`Permission verified. Attached ${results.length} image(s).`, "emerald");
+      });
+    }, 400); // 400ms visual feedback delay for permissions prompt
+  };
+
+  const removeSelectedImage = (index: number) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -102,7 +136,7 @@ export const TimelineFeed: React.FC<TimelineFeedProps> = ({
 
     setIsBroadcasting(true);
     setTimeout(() => {
-      onCreateComplaint(title, category, severity, descriptionHtml);
+      onCreateComplaint(title, category, severity, descriptionHtml, selectedImages);
       setIsBroadcasting(false);
       handleCancel();
     }, 800);
@@ -186,7 +220,52 @@ export const TimelineFeed: React.FC<TimelineFeedProps> = ({
                   <label>Outage Details</label>
                   <div id="editor-container" style={{ height: '120px' }}></div>
                 </div>
+
+                {/* Upload Thumbnail Previews */}
+                {selectedImages.length > 0 && (
+                  <div className="composer-previews">
+                    {selectedImages.map((src, idx) => (
+                      <div key={idx} className="preview-thumbnail">
+                        <img src={src} alt="Upload preview" />
+                        <button
+                          type="button"
+                          className="remove-preview-btn"
+                          onClick={() => removeSelectedImage(idx)}
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div className="composer-actions-row">
+                  {/* Gallery/PC Media Attachment Trigger */}
+                  <div className="composer-attachments" style={{ marginRight: 'auto' }}>
+                    <button
+                      type="button"
+                      className="composer-action-btn"
+                      onClick={() => fileInputRef.current?.click()}
+                      title="Attach outage pictures"
+                      disabled={isBroadcasting}
+                    >
+                      <svg viewBox="0 0 24 24" className="composer-action-icon" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                      </svg>
+                      <span>Add Media</span>
+                    </button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      multiple
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                    />
+                  </div>
+
                   <button
                     type="button"
                     className="btn btn-cancel-composer"

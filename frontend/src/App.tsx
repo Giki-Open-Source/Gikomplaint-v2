@@ -25,6 +25,7 @@ interface Complaint {
   authorName: string;
   authorEmail: string;
   createdAt: string;
+  images?: string[];
 }
 
 // Initial Mock Complaints Data
@@ -45,6 +46,7 @@ const initialComplaints: Complaint[] = [
     authorName: 'Zainab Ali',
     authorEmail: 'u2022091@giki.edu.pk',
     createdAt: new Date(Date.now() - 3 * 3600000).toISOString(),
+    images: ['/leak_outage.png'],
   },
   {
     id: 2,
@@ -79,6 +81,7 @@ const initialComplaints: Complaint[] = [
     authorName: 'Usman Khan',
     authorEmail: 'u2021110@giki.edu.pk',
     createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+    images: ['/router_outage.png'],
   },
   {
     id: 4,
@@ -204,7 +207,8 @@ export default function App() {
     title: string,
     category: string,
     severity: string,
-    description: string
+    description: string,
+    images?: string[]
   ) => {
     if (!user) return;
 
@@ -230,18 +234,14 @@ export default function App() {
       authorName: `${user.first_name} ${user.last_name}`,
       authorEmail: user.email,
       createdAt: new Date().toISOString(),
+      images,
     };
 
     setComplaints((prev) => [newComplaint, ...prev]);
     showToast('Outage incident broadcasted.', 'emerald');
   };
 
-  // Scoreboard counters calculations
-  const pendingCount = complaints.filter(
-    (c) => c.status === 'pending' || c.status === 'assigned' || c.status === 'in_progress'
-  ).length;
-  const resolvedCount = complaints.filter((c) => c.status === 'resolved').length;
-  const totalCount = complaints.length;
+
 
   // View routing switcher
   if (!token || !user) {
@@ -327,15 +327,8 @@ export default function App() {
       <main className="timeline-container">
         {/* TIMELINE CENTRAL COLUMN */}
         <div className="timeline-feed-column">
-          {/* Topbar Sticky Header */}
           <header className="timeline-header">
             <h2>Campus Outages</h2>
-            <div className="timeline-header-meta">
-              <span className="status-indicator-green"></span>
-              <span className="status-indicator-text">
-                {pendingCount} active &bull; {resolvedCount} resolved &bull; {totalCount} total
-              </span>
-            </div>
           </header>
 
           {/* TAB ROUTING */}

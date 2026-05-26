@@ -75,8 +75,18 @@ func main() {
 	workDir, _ := os.Getwd()
 	distDir := filepath.Join(workDir, "frontend", "dist")
 
-	// Direct serve of index.html at root "/"
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	// Catch-all route to serve static files from root distDir or fallback to index.html for SPA
+	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+		path := filepath.Clean(r.URL.Path)
+		fullPath := filepath.Join(distDir, path)
+
+		// If the file exists and is not a directory, serve it
+		if info, err := os.Stat(fullPath); err == nil && !info.IsDir() {
+			http.ServeFile(w, r, fullPath)
+			return
+		}
+
+		// Otherwise fallback to serving index.html for client-side routing
 		http.ServeFile(w, r, filepath.Join(distDir, "index.html"))
 	})
 
