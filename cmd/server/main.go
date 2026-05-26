@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -71,7 +72,22 @@ func main() {
 	})
 
 	// 5. Register Routes
+	workDir, _ := os.Getwd()
+	publicDir := http.Dir(filepath.Join(workDir, "public"))
+
+	// Direct serve of index.html at root "/"
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(workDir, "public", "index.html"))
+	})
+
+	// Mount the static files (style.css, app.js, images, etc.)
+	r.Get("/public/*", func(w http.ResponseWriter, r *http.Request) {
+		fs := http.StripPrefix("/public/", http.FileServer(publicDir))
+		fs.ServeHTTP(w, r)
+	})
+
+	// JSON endpoint to test API responsiveness
+	r.Get("/api/welcome", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{
 			"app":     "Gikomplaint-v2 API",

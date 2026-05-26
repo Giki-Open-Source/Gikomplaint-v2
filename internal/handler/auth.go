@@ -2,8 +2,10 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/giki-open-source/gikomplaint-v2/internal/service"
@@ -70,14 +72,10 @@ func (h *AuthHandler) HandleMicrosoftCallback(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// 4. Return success session
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "Authentication successful",
-		"token":   token,
-		"user":    user,
-	})
+	// 4. Redirect to frontend with token and user details in query parameters
+	userBytes, _ := json.Marshal(user)
+	redirectURL := fmt.Sprintf("/?token=%s&user=%s", token, url.QueryEscape(string(userBytes)))
+	http.Redirect(w, r, redirectURL, http.StatusTemporaryRedirect)
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
