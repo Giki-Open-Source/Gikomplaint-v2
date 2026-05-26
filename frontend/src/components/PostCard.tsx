@@ -113,106 +113,128 @@ export const PostCard: React.FC<PostCardProps> = ({
   };
 
   return (
-    <div className="glass-card complaint-card">
-      <div className="comp-header">
-        <div className="comp-user-block">
-          <div className="user-avatar">
-            {complaint.authorName ? complaint.authorName.charAt(0).toUpperCase() : 'G'}
+    <div className="complaint-card">
+      <div className="comp-avatar-col">
+        <div className="user-avatar">
+          {complaint.authorName ? complaint.authorName.charAt(0).toUpperCase() : 'G'}
+        </div>
+      </div>
+
+      <div className="comp-main-col">
+        <div className="comp-header-row">
+          <div className="comp-user-info">
+            <strong className="comp-author-name">{complaint.authorName}</strong>
+            <span className="comp-author-meta">
+              {authorHandle} &middot; {complaint.authorEmail}
+            </span>
+            <span className="comp-dot">&middot;</span>
+            <span className="comp-time-ago">{relativeTime}</span>
           </div>
-          <div className="comp-user-meta">
-            <h4>{complaint.authorName}</h4>
-            <span>{authorHandle} &bull; {complaint.authorEmail}</span>
+
+          <div className={`comp-priority-badge ${gpiClass}`}>
+            GPI {complaint.gpi}
           </div>
         </div>
 
-        {/* Dynamic priority index badge */}
-        <div className={`comp-priority-badge ${gpiClass}`}>
-          GPI {complaint.gpi}
+        <div className="comp-body">
+          <h3 className="comp-title">{complaint.title}</h3>
+          <div
+            className="comp-body-desc"
+            dangerouslySetInnerHTML={{ __html: complaint.description }}
+          />
+
+          <div className="comp-meta-tags">
+            <span className={`badge badge-cat-${complaint.category}`}>
+              {complaint.category.replace('_', ' ')}
+            </span>
+            <span className={`badge badge-severity-${complaint.severity}`}>
+              {complaint.severity}
+            </span>
+            <span className={`badge badge-status-${complaint.status}`}>
+              {complaint.status}
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div className="comp-content-wrapper">
-        <h3>{complaint.title}</h3>
-        <div
-          className="comp-body-desc"
-          dangerouslySetInnerHTML={{ __html: complaint.description }}
-        />
+        {/* Social actions */}
+        <div className="comp-social-actions">
+          <button
+            className={`action-btn action-btn-upvote ${complaint.hasUpvoted ? 'active' : ''}`}
+            onClick={handleUpvote}
+            title="Support incident report"
+          >
+            <svg viewBox="0 0 24 24" className="action-icon-svg" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 19V5M5 12l7-7 7 7"/>
+            </svg>
+            <span className="upvote-count">{complaint.upvotes}</span>
+          </button>
 
-        <div className="comp-meta-tags">
-          <span className={`badge badge-cat-${complaint.category}`}>
-            {complaint.category.replace('_', ' ')}
-          </span>
-          <span className={`badge badge-severity-${complaint.severity}`}>
-            {complaint.severity}
-          </span>
-          <span className={`badge badge-status-${complaint.status}`}>
-            {complaint.status}
-          </span>
+          <button
+            className={`action-btn action-btn-score ${isScorerOpen ? 'active' : ''}`}
+            onClick={() => setIsScorerOpen(!isScorerOpen)}
+            title="Evaluate severity index"
+          >
+            <svg viewBox="0 0 24 24" className="action-icon-svg" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="4" y1="21" x2="4" y2="14" />
+              <line x1="4" y1="10" x2="4" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12" y2="3" />
+              <line x1="20" y1="21" x2="20" y2="16" />
+              <line x1="20" y1="12" x2="20" y2="3" />
+              <line x1="1" y1="14" x2="7" y2="14" />
+              <line x1="9" y1="8" x2="15" y2="8" />
+              <line x1="17" y1="16" x2="23" y2="16" />
+            </svg>
+            <span>Evaluate</span>
+          </button>
         </div>
-      </div>
 
-      {/* Social actions */}
-      <div className="comp-social-actions">
-        <button
-          className={`action-btn action-btn-upvote ${complaint.hasUpvoted ? 'active' : ''}`}
-          onClick={handleUpvote}
-        >
-          <span>▲</span> <strong className="upvote-count">{complaint.upvotes}</strong> Support
-        </button>
-        <button
-          className={`action-btn action-btn-score ${isScorerOpen ? 'active' : ''}`}
-          onClick={() => setIsScorerOpen(!isScorerOpen)}
-        >
-          <span>⚙</span> Evaluate
-        </button>
-        <span className="comp-time-ago">{relativeTime}</span>
-      </div>
-
-      {/* Nested Scorer Slider Panel */}
-      {isScorerOpen && (
-        <div className="scorer-drawer">
-          <div className="scorer-card">
-            <div className="scorer-row">
-              <div className="score-control">
-                <div className="score-control-header">
-                  <label>Reach Scale</label>
-                  <span>{getReachLabel(complaint.reach)}</span>
+        {/* Nested Scorer Slider Panel */}
+        {isScorerOpen && (
+          <div className="scorer-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="scorer-card">
+              <div className="scorer-row">
+                <div className="score-control">
+                  <div className="score-control-header">
+                    <label>Reach Scale</label>
+                    <span>{getReachLabel(complaint.reach)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="5"
+                    value={complaint.reach}
+                    onChange={(e) => handleSliderChange('reach', parseInt(e.target.value))}
+                    className="slider-reach"
+                  />
                 </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  value={complaint.reach}
-                  onChange={(e) => handleSliderChange('reach', parseInt(e.target.value))}
-                  className="slider-reach"
-                />
+                <div className="score-control">
+                  <div className="score-control-header">
+                    <label>Disruption Scale</label>
+                    <span>{getDisruptLabel(complaint.disruption)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="5"
+                    value={complaint.disruption}
+                    onChange={(e) => handleSliderChange('disruption', parseInt(e.target.value))}
+                    className="slider-disrupt"
+                  />
+                </div>
               </div>
-              <div className="score-control">
-                <div className="score-control-header">
-                  <label>Disruption Scale</label>
-                  <span>{getDisruptLabel(complaint.disruption)}</span>
+              <div className="scorer-drawer-footer">
+                <span className="scorer-summary-desc">
+                  Adjust sliders to dynamically evaluate incident impact indices.
+                </span>
+                <div className="scorer-index-badge">
+                  <span>Calculated GPI:</span> <strong>{complaint.gpi} / 100</strong>
                 </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  value={complaint.disruption}
-                  onChange={(e) => handleSliderChange('disruption', parseInt(e.target.value))}
-                  className="slider-disrupt"
-                />
               </div>
             </div>
-            <div className="scorer-drawer-footer">
-              <span className="scorer-summary-desc">
-                Adjust sliders to dynamically evaluate incident impact indices.
-              </span>
-              <div className="scorer-index-badge">
-                <span>Calculated GPI:</span> <strong>{complaint.gpi} / 100</strong>
-              </div>
-            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
