@@ -48,6 +48,10 @@ func main() {
 	authService := service.NewAuthService(cfg, userRepo, redisClient)
 	authHandler := handler.NewAuthHandler(authService)
 
+	complaintRepo := repository.NewComplaintRepository(pgDB)
+	complaintService := service.NewComplaintService(complaintRepo, redisClient)
+	complaintHandler := handler.NewComplaintHandler(complaintService)
+
 	// 4. Setup Router & Middleware
 	r := chi.NewRouter()
 
@@ -110,6 +114,22 @@ func main() {
 	r.Route("/auth", func(r chi.Router) {
 		r.Get("/microsoft/login", authHandler.RedirectToMicrosoft)
 		r.Get("/microsoft/callback", authHandler.HandleMicrosoftCallback)
+		r.Get("/sandbox", authHandler.HandleSandboxLogin)
+	})
+
+	// API Protected Routes Group
+	r.Route("/api", func(r chi.Router) {
+		r.Use(handler.AuthMiddleware(cfg.JWTSecret))
+
+		// Complaints Feed & Actions
+		r.Get("/complaints", complaintHandler.ListComplaints)
+		r.Post("/complaints", complaintHandler.CreateComplaint)
+		r.Post("/complaints/{id}/upvote", complaintHandler.ToggleUpvote)
+
+		// Operator Controls (Restricted to Staff/Admin)
+		r.With(handler.RequireRole("staff", "admin")).Post("/complaints/{id}/claim", complaintHandler.ClaimComplaint)
+		r.With(handler.RequireRole("staff", "admin")).Post("/complaints/{id}/reassign", complaintHandler.ReassignComplaint)
+		r.With(handler.RequireRole("staff", "admin")).Post("/complaints/{id}/resolve", complaintHandler.ResolveComplaint)
 	})
 
 	// Robust Health Check checking both PG and Redis

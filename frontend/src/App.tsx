@@ -27,6 +27,8 @@ interface Complaint {
   authorEmail: string;
   createdAt: string;
   images?: string[];
+  assignedTo?: string;
+  resolutionNotes?: string;
 }
 
 // Initial Mock Complaints Data
@@ -185,80 +187,137 @@ export default function App() {
     showToast('Session terminated.', 'amber');
   };
 
-  const handleSandboxLogin = (role: 'student' | 'staff' | 'admin') => {
-    let mockUser: User = {
-      id: 101,
-      email: 'student_demo@giki.edu.pk',
-      first_name: 'Demo',
-      last_name: 'Student',
-      role: 'student',
-    } as any;
-
-    if (role === 'staff') {
-      mockUser = {
-        id: 102,
-        email: 'plumber_dispatcher@giki.edu.pk',
-        first_name: 'Zafar',
-        last_name: 'Iqbal (Plumbing)',
-        role: 'staff',
-      } as any;
-    } else if (role === 'admin') {
-      mockUser = {
-        id: 103,
-        email: 'admin_manager@giki.edu.pk',
-        first_name: 'Dr. Suleman',
-        last_name: 'Khan (Manager)',
-        role: 'admin',
-      } as any;
+  const fetchComplaints = async (customToken?: string) => {
+    const activeToken = customToken || token;
+    if (!activeToken) return;
+    try {
+      const res = await fetch('/api/complaints', {
+        headers: {
+          'Authorization': `Bearer ${activeToken}`
+        }
+      });
+      if (!res.ok) throw new Error('Failed to load timeline');
+      const data = await res.json();
+      setComplaints(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      showToast(err.message || 'Error syncing timeline feed.', 'rose');
     }
-
-    const mockToken = `simulated_jwt_token_for_${role}_sandbox`;
-    storeSession(mockToken, mockUser);
-    showToast(`${role.toUpperCase()} sandbox session initiated.`, 'cyan');
   };
 
-  const handleUpdateComplaint = (id: number, updatedFields: Partial<Complaint>) => {
+  useEffect(() => {
+    if (token) {
+      fetchComplaints();
+    }
+  }, [token]);
+
+  const handleSandboxLogin = async (role: 'student' | 'staff' | 'admin') => {
+    try {
+      const res = await fetch(`/auth/sandbox?role=${role}`);
+      if (!res.ok) throw new Error('Failed to establish sandbox connection');
+      const data = await res.json();
+      storeSession(data.token, data.user);
+      showToast(`${role.toUpperCase()} sandbox session initiated.`, 'cyan');
+      fetchComplaints(data.token);
+    } catch (err: any) {
+      showToast(err.message || 'Sandbox authentication failed.', 'rose');
+    }
+  };
+
+  const handleUpdateComplaint = async (id: number, updatedFields: Partial<Complaint>) => {
+    // 1. Optimistic UI update for immediate response
     setComplaints((prev) =>
       prev.map((c) => (c.id === id ? { ...c, ...updatedFields } : c))
     );
+
+    if (!token) return;
+
+    try {
+      // 2. Perform backend API sync
+      if (updatedFields.hasUpvoted !== undefined) {
+        const res = await fetch(`/api/complaints/${id}/upvote`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error('Failed to toggle upvote');
+        const data = await res.json();
+        // Sync actual DB-returned upvotes count
+        setComplaints((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, upvotes: data.upvotes, hasUpvoted: data.hasUpvoted } : c))
+        );
+      } else if (updatedFields.status === 'assigned') {
+        const res = await fetch(`/api/complaints/${id}/claim`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error('Failed to claim ticket');
+        const data = await res.json();
+        setComplaints((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, status: 'assigned', assignedTo: data.assignedTo } : c))
+        );
+      } else if (updatedFields.status === 'pending' && updatedFields.category !== undefined) {
+        const res = await fetch(`/api/complaints/${id}/reassign`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ category: updatedFields.category })
+        });
+        if (!res.ok) throw new Error('Failed to reassign ticket');
+        fetchComplaints();
+      } else if (updatedFields.status === 'resolved') {
+        const res = await fetch(`/api/complaints/${id}/resolve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ resolutionNotes: updatedFields.resolutionNotes })
+        });
+        if (!res.ok) throw new Error('Failed to submit resolution steps');
+        fetchComplaints();
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Failed to synchronize with server.', 'rose');
+      fetchComplaints();
+    }
   };
 
-  const handleCreateComplaint = (
+  const handleCreateComplaint = async (
     title: string,
     category: string,
     severity: string,
     description: string,
     images?: string[]
   ) => {
-    if (!user) return;
-
-    // Calculate dynamic starting index
-    const reach = 3; // default: Wing-wide
-    const disruption = 3; // default: Distracting
-    const upvotes = 1;
-    const multiplier = 1 + Math.log10(upvotes);
-    const startingGpi = Math.round(reach * disruption * multiplier * 4);
-
-    const newComplaint: Complaint = {
-      id: complaints.length + 1,
-      title,
-      category,
-      severity,
-      status: 'pending',
-      description,
-      upvotes,
-      hasUpvoted: true,
-      reach,
-      disruption,
-      gpi: startingGpi > 100 ? 100 : startingGpi,
-      authorName: `${user.first_name} ${user.last_name}`,
-      authorEmail: user.email,
-      createdAt: new Date().toISOString(),
-      images,
-    };
-
-    setComplaints((prev) => [newComplaint, ...prev]);
-    showToast('Outage incident broadcasted.', 'emerald');
+    if (!token || !user) return;
+    try {
+      const res = await fetch('/api/complaints', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title,
+          category,
+          severity,
+          description,
+          reach: 3,
+          disruption: 3,
+          images: images || []
+        })
+      });
+      if (!res.ok) throw new Error('Failed to broadcast outage');
+      showToast('Outage incident broadcasted.', 'emerald');
+      fetchComplaints();
+    } catch (err: any) {
+      showToast(err.message || 'Error broadcasting outage.', 'rose');
+    }
   };
 
 

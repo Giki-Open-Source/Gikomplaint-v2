@@ -78,6 +78,28 @@ func (h *AuthHandler) HandleMicrosoftCallback(w http.ResponseWriter, r *http.Req
 	http.Redirect(w, r, redirectURL, http.StatusTemporaryRedirect)
 }
 
+// HandleSandboxLogin handles GET /auth/sandbox
+func (h *AuthHandler) HandleSandboxLogin(w http.ResponseWriter, r *http.Request) {
+	role := r.URL.Query().Get("role")
+	if role != "student" && role != "staff" && role != "admin" {
+		respondWithError(w, http.StatusBadRequest, "Invalid sandbox role parameter")
+		return
+	}
+
+	token, user, err := h.authService.AuthenticateSandboxUser(r.Context(), role)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to authenticate sandbox session: "+err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		"token": token,
+		"user":  user,
+	})
+}
+
 func respondWithError(w http.ResponseWriter, code int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)

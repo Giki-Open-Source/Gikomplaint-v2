@@ -261,6 +261,59 @@ func (s *AuthService) GenerateJWT(user *domain.User) (string, error) {
 	return tokenString, nil
 }
 
+// AuthenticateSandboxUser registers sandbox users in PostgreSQL and signs dynamic JWT tokens.
+func (s *AuthService) AuthenticateSandboxUser(ctx context.Context, role string) (string, *domain.User, error) {
+	var email, firstName, lastName string
+	if role == "student" {
+		email = "student_demo@giki.edu.pk"
+		firstName = "Demo"
+		lastName = "Student"
+	} else if role == "staff" {
+		email = "zafar_plumber@giki.edu.pk"
+		firstName = "Zafar"
+		lastName = "Iqbal (Plumbing)"
+	} else if role == "admin" {
+		email = "admin_manager@giki.edu.pk"
+		firstName = "Dr. Suleman"
+		lastName = "Khan (Manager)"
+	} else {
+		return "", nil, errors.New("invalid sandbox role")
+	}
+
+	// 1. Check if user already exists
+	user, err := s.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return "", nil, fmt.Errorf("error querying sandbox user email: %w", err)
+	}
+
+	if user == nil {
+		// Register new user profile in database
+		user = &domain.User{
+			Email:     email,
+			FirstName: firstName,
+			LastName:  lastName,
+			Role:      role,
+		}
+		if err := s.userRepo.Create(ctx, user); err != nil {
+			return "", nil, fmt.Errorf("failed to register sandbox profile: %w", err)
+		}
+	} else {
+		// Sync the role if it was altered during development testing
+		if user.Role != role {
+			user.Role = role
+			_ = s.userRepo.Update(ctx, user)
+		}
+	}
+
+	// 2. Sign dynamic session JWT
+	token, err := s.GenerateJWT(user)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return token, user, nil
+}
+
 func generateRandomState() (string, error) {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
